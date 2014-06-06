@@ -1,0 +1,113 @@
+#+TITLE: YASEXML : Yet Another Symbolic Expression eXtensible Markup Language
+
+    /PWAP: Paradigms of Web Application Programming/
+
+* Introduction
+
+YASEXML is just a very simple, yet grandly effective way of using
+s-expressions to represent HTML/XML/SAX type elements and documents..
+
+So, the following sexps return the XML that follows that.
+#+BEGIN_SRC lisp :results value
+  (import 'yasexml:<>)
+  (<> (paragraph :title "About YASEXML")
+    (<> " 
+  - Source code itself is human-readable and machine-readable.
+  - XML is primarily used to represent data. 
+  - Sexps combine source and data.")
+    (<> (:text #\Newline))
+    (<> "By having a very simple macro, ") (<> b (<> "YASEXML:<>"))
+    (<> ", we can add XML and HTML into the very sexp mix."))
+#+END_SRC
+
+: <paragraph title="About YASEXML"> 
+: - Source code itself is human-readable and machine-readable.
+: - XML is primarily used to represent data. 
+: - Sexps combine source and data.
+: By having a very simple macro, <b>YASEXML:&lt;&gt;</b>, we can add XML and HTML into the very sexp mix.</paragraph>
+
+** links
+
+#+BEGIN_QUOTE
+s-expressions, sexprs or sexps (for "symbolic expression") are a
+notation for nested list (tree-structured) data, invented for and
+popularized by the programming language Lisp, which uses them for
+source code as well as data.
+ -- https://en.wikipedia.org/wiki/S-expression
+#+END_QUOTE
+
+#+BEGIN_QUOTE
+Extensible Markup Language (XML) is a markup language that defines a
+set of rules for encoding documents in a format that is both
+human-readable and machine-readable.
+ -- https://en.wikipedia.org/wiki/XML
+#+END_QUOTE
+
+* Example Use 
+
+** HTML pages
+
+Since a lot of interfaces these days are web based, and the data
+language used to markup web pages, HTML, is nearly identical to
+XML/XHTML, ours YASEXML works great to generate such things.
+
+Let us say we have a list of strings, and we simply want to generate a
+=ul= with =li='s:
+
+#+BEGIN_SRC lisp :results value html  
+  (<> ul (dolist (i '(this is a big olde list of items)) 
+           (<> li (<> (:text i)))))
+#+END_SRC
+
+#+BEGIN_HTML
+<ul><li>THIS</li><li>IS</li><li>A</li><li>BIG</li><li>OLDE</li><li>LIST</li><li>OF</li><li>ITEMS</li></ul>
+#+END_HTML
+
+Because of that, we can sort of meta-circularly use YASEXML to display
+it's own =CL:DOCUMENTATION=.
+
+#+BEGIN_SRC lisp 
+  (import 'yasexml:<>)
+  (let ((docs (documentation '<> 'function)))
+    (<> pre (<> (:text docs))))  
+#+END_SRC
+
+*RESULTS:*
+
+#+begin_example
+<pre>=&gt; /whatever &amp;body returns/
+Example : (&lt;&gt; (:handler (cxml:make-string-sink
+		     :indentation 1))
+	   (&lt;&gt; (test-tag :test-attribute "test-attribute-value")
+	     (&lt;&gt; "Test Text as Tag" (&lt;&gt; (br)))
+	     (&lt;&gt; (:text "Test :TEXT as Tag") 
+	       (&lt;&gt; ("foo bar=baz" :bat "?"))
+	       (&lt;&gt; (:text "Test " ":TEXT" "many strings"))
+	       (&lt;&gt; `(:text ,(concatenate 
+			     'string "Test " ":TEXT "
+			      "many strings with backquote " 
+			      "and concatenate" ))
+		 (&lt;&gt; `(,(funcall (constantly 'backquoted-tag-name))
+			,@(list 'list "attribute")))))))
+	     
+"&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;test-tag test-attribute="test-attribute-value"&gt;
+ Test Text as Tag
+ &lt;br/&gt;
+ Test :TEXT as Tag
+ &lt;foo bar=baz bat="?"/&gt;
+ Test
+ :TEXT
+ many strings
+ Test :TEXT many strings with backquote and concatenate
+ &lt;backquoted-tag-name list="attribute"/&gt;
+&lt;/test-tag&gt;"</pre>
+#+end_example
+
+
+
+
+
+
+
+
