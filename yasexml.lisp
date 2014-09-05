@@ -1,16 +1,16 @@
-(cl:defpackage :yasexmla
-  (:documentation 
+(cl:defpackage :yasexml
+  (:documentation
    "YASEXML: Yet Another Symbolic Expression eXtensible Markup Language")
   (:use :cl)
-  (:nicknames :yasexml/yasexmla)
+  (:nicknames :yasexml/yasexml)
   (:import-from :cxml)
   (:import-from :sax)
   (:export #:<>
 	   #:tag
-	   #:call-with-tag 
+	   #:call-with-tag
 	   #:call-with-handler
 	   #:call-with-current-handler))
-(cl:in-package :yasexmla)
+(cl:in-package :yasexml)
 
 (defgeneric call-with-tag (function tag &rest tag-attributes))
 
@@ -23,15 +23,6 @@
     (cxml:make-string-sink 
      :canonical nil
      :omit-xml-declaration-p t)))
-
-(defun wrap-in-handler (tag function)
-  (cond ((and (not (boundp '*handler*))
-	      (not (eql (if (listp tag) (first tag) tag)
-			:handler)))
-	 (<> (:handler (default-handler *package*))
-	   (wrap-in-handler tag function)))
-	(t
-	 (funcall function))))
 
 (defgeneric tag (tag &optional function)
   (:method 
@@ -60,7 +51,7 @@
   
   (defvar *document*)
   (setf (documentation '*document* 'variable)
-	"The current SAX handler for CALL-WITH-TAG to use"))
+	"The current SAX document for CALL-WITH-TAG to use"))
 
 (defun call-with-current-handler (function)
   (call-with-handler function *handler*))
@@ -193,6 +184,15 @@
 		    ,@(rest tag))))
 	(t tag))
       (lambda () ,@body)))
+
+(defun wrap-in-handler (tag function)
+  (cond ((and (not (boundp '*handler*))
+	      (not (eql (if (listp tag) (first tag) tag)
+			:handler)))
+	 (<> (:handler (default-handler *package*))
+	   (wrap-in-handler tag function)))
+	(t
+	 (funcall function))))
 
 (setf (documentation '<> 'function)
  #.(symbol-name '#:|=> /whatever &body returns/
